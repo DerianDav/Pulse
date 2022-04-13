@@ -17,6 +17,13 @@ namespace Pulse.Controllers
             return View(images);
         }
 
+        /*Takes user uploaded image and saves it to the database
+            returns: 0 - No Error
+                     1 - Null file
+                     2 - Title to long
+                     3 - Image to big
+             
+         */
         public int ImageUpload(Models.ImageModelHTTP image)
         {
             System.Diagnostics.Debug.WriteLine("start upload");
@@ -41,7 +48,6 @@ namespace Pulse.Controllers
                 var imgCtx = new DBContext.ImageContext();
                 imgCtx.Image.Add(new Models.ImageModel { Id = 1, Title = fileNameNoEx, ImageText = b64Image, DateConverted = dateConverted });
                 imgCtx.SaveChanges();
-                System.Diagnostics.Debug.WriteLine("Uploaded Image");
                 return 0;
 
             }
