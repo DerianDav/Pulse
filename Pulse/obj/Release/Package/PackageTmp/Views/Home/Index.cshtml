@@ -1,0 +1,114 @@
+﻿@model IEnumerable<Pulse.Models.ImageModel>
+
+@{
+    ViewBag.Title = "ListImages";
+}
+
+<h2>ListImages</h2>
+
+@{int count = 0; }
+<p allign>
+    <button type="button" onclick="downloadSelected()" style="float:right"> Download Selected</button>
+
+</p>
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.Title)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.ImageText)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.DateConverted)
+        </th>
+        <th>Download</th>
+    </tr>
+    @foreach (var item in Model)
+    {
+        count++;
+        <tr>
+            <td>
+                <div id="@("T" + count)">
+                    @Html.DisplayFor(modelItem => item.Title, new { id = "T" + count })
+                </div>
+            </td>
+            <td>
+                <button type="button" onclick="toggleImage(@count)">Show Image <span>@count</span></button>
+                <img src="data:image/jpeg;base64,@Html.DisplayFor(modelItem => item.ImageText)"
+                     id=@count
+                     style="display: none;" />
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.DateConverted)
+            </td>
+            <td>
+                @Html.CheckBoxFor(modelItem => item.isSelected, new { id = "CB" + count })
+            </td>
+        </tr>
+    }
+
+</table>
+<h1>Upload File</h1>
+<div>
+    <input type="file" id="newImage" />
+    <button type="button" onclick="uploadImage()" style="float:right"> Upload</button>
+
+
+</div>
+
+@section Scripts{
+    <script type="text/javascript">
+        function toggleImage(id) {
+            var img = document.getElementById(id);
+            img.style.display = img.style.display == "none" ? "block" : "none";
+        }
+
+    </script>
+
+    <script type="text/javascript">
+        function uploadImage() {
+            console.log("start");
+            var file = document.getElementById("newImage").files[0];
+            console.log(file);
+            var data = new FormData;
+            data.append("ImageFile", file);
+            $.ajax
+                ({
+                    type: "Post",
+                    url: "/Home/ImageUpload",
+                    data: data,
+                    contentType: false,
+                    processData: false,
+                    success: function (response) {
+                        window.location.reload(true);
+                        return false;
+                    }
+
+                })
+        }
+
+        function downloadSelected()
+        {
+            var zip = new JSZip();
+
+            for (let i = 1; i<= 10; i++)
+            {
+                console.log("start ex");
+                if (document.getElementById("CB"+i).checked)
+                {
+                    var title = "";
+                    title += document.getElementById("T" + i).innerText + ".txt";
+                    console.log(title);
+                    zip.file(title, document.getElementById(i).src);
+                       console.log("Execute");
+                }
+            }
+            zip.generateAsync({ type: 'blob' }).then(function (content) {
+            saveAs(content, 'download.zip');
+            });
+
+        }
+
+    </script>
+}
